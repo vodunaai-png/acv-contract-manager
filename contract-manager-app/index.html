@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACV Contract Manager</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Lexend:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/legacy.css">
+</head>
+
+<body>
+    <!-- GLOW BACKGROUND EFFECTS -->
+    <div class="app-background">
+
+
+    </div>
+
+    <!-- WELCOME MODAL (For Initial User Info Input) -->
+    <div id="welcome-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-panel welcome-glass">
+            <div class="brand">
+                <i class="ph ph-airplane-tilt brand-icon"></i>
+                <h2>ACV Contract Hub</h2>
+            </div>
+            <p class="subtitle">Vui lòng nhập thông tin để phân quyền dữ liệu</p>
+            <form id="welcome-form">
+                <div class="form-group">
+                    <label>Họ và tên *</label>
+                    <input type="text" id="user-name" placeholder="Ví dụ: Nguyễn Văn A" required>
+                </div>
+                <div class="form-group">
+                    <label>Bộ phận công tác *</label>
+                    <div class="input-wrapper">
+                        <select id="user-dept" required>
+                            <option value="">-- Đang tải dữ liệu... --</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="ph ph-sign-in"></i> Bắt đầu
+                </button>
+            </form>
+            <div class="mt-24 text-center">
+                <a href="#admin" id="btn-open-admin-login" class="text-sm text-sec"><i class="ph ph-shield"></i> Trang
+                    Quản Trị</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APPLICATION -->
+    <div id="app-container" class="app-container" style="display: none;">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <i class="ph ph-airplane-tilt logo-icon"></i>
+                <div class="logo-text">
+                    <span class="acv">ACV</span>
+                    <span class="sub">Contracts</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-view="dashboard">
+                    <i class="ph ph-squares-four"></i> Dashboard
+                </a>
+                <a href="#new" class="nav-item" data-view="new">
+                    <i class="ph ph-magic-wand"></i> Lấy Số Hợp Đồng
+                </a>
+                <a href="#export" class="nav-item" id="nav-export">
+                    <i class="ph ph-download-simple"></i> Xuất Excel (Gốc)
+                </a>
+                <a href="#admin" class="nav-item" data-view="admin">
+                    <i class="ph ph-shield-check"></i> Quản Trị Hệ Thống
+                </a>
+                <a href="#manual" class="nav-item" data-view="manual">
+                    <i class="ph ph-book-open"></i> Hướng Dẫn Sử Dụng
+                </a>
+            </nav>
+
+            <div class="sidebar-theme-toggle mb-16 px-16">
+                <label for="themeSelectDropdown"
+                    style="font-size:12px;color:var(--text-sec);display:block;margin-bottom:6px">Giao diện
+                    (UI/UX):</label>
+                <select id="themeSelectDropdown" class="w-100"
+                    style="background:var(--bg-primary);color:var(--text-primary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-family:var(--font-ui);cursor:pointer;outline:none;">
+                    <option value="light">Clarity (Nền Sáng)</option>
+                    <option value="dark">Clarity (Nền Tối)</option>
+                    <option value="legacy">Legacy (Thiết kế cũ)</option>
+                </select>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-badge" id="btn-settings">
+                    <div class="avatar"><i class="ph ph-user"></i></div>
+                    <div class="user-info">
+                        <span class="name" id="display-name">Loading...</span>
+                        <span class="dept" id="display-dept">Loading...</span>
+                    </div>
+                    <i class="ph ph-gear"></i>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+
+            <!-- VIEW: DASHBOARD -->
+            <section id="view-dashboard" class="view-section active">
+                <header class="view-header">
+                    <div>
+                        <h1>Tổng Quan Hợp Đồng</h1>
+                        <p class="view-desc">Thống kê và tìm kiếm danh sách hợp đồng đã nhập.</p>
+                    </div>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon stat-blue"><i class="ph ph-file-text"></i></div>
+                        <div class="stat-data">
+                            <h3>Tổng số HĐ</h3>
+                            <h2 id="stat-total">...</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon stat-emerald"><i class="ph ph-money"></i></div>
+                        <div class="stat-data">
+                            <h3>Tổng Giá Trị (VND)</h3>
+                            <h2 id="stat-value">...</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel">
+                        <div class="stat-icon stat-amber"><i class="ph ph-cloud"></i></div>
+                        <div class="stat-data">
+                            <h3>File Gốc Hệ Thống</h3>
+                            <h2 id="stat-files">...</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-panel glass-panel mt-24">
+                    <div class="table-toolbar">
+                        <div class="search-box">
+                            <i class="ph ph-magnifying-glass"></i>
+                            <input type="text" id="search-input"
+                                placeholder="Tìm kiếm số HĐ, Chủ đầu tư, Nhà thầu, Dự án...">
+                        </div>
+                        <button class="btn btn-secondary" onclick="app.refreshData()">
+                            <i class="ph ph-arrows-clockwise"></i> Làm mới
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Số HĐ</th>
+                                    <th>CĐT/Dự Án</th>
+                                    <th>Nhà Thầu</th>
+                                    <th class="text-right">Giá Trị (VND)</th>
+                                    <th class="text-center">File</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <tr>
+                                    <td colspan="6" class="text-center loading-text">Đang tải dữ liệu...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: NEW/EDIT ENTRY (THE SMART FORM) -->
+            <section id="view-new" class="view-section">
+                <header class="view-header">
+                    <div>
+                        <h1 id="form-title">Lấy Số Hợp Đồng</h1>
+                        <p class="view-desc">Tải hợp đồng lên để AI trích tự động hoặc điền thủ công để lấy số cấu trúc
+                            mới.</p>
+                    </div>
+                    <div class="header-actions">
+                        <button type="button" class="btn btn-secondary" id="btn-clear-form"><i class="ph ph-trash"></i>
+                            Làm Mới
+                            form</button>
+                        <button type="button" class="btn btn-primary" id="btn-new-contract"
+                            style="display:none;background:var(--emerald-500);"><i class="ph ph-plus-circle"></i> + Lấy
+                            số cho hợp đồng mới</button>
+                        <button type="button" class="btn btn-primary" id="btn-save-form"><i
+                                class="ph ph-floppy-disk"></i> Tôi đã kiểm tra, lưu thông tin và lấy số HĐ</button>
+                    </div>
+                </header>
+
+                <form id="contract-form" class="smart-form">
+
+                    <!-- CẤU TRÚC SỐ HỢP ĐỒNG (Moved Top) -->
+                    <div class="form-section glass-panel mb-24">
+                        <h3 class="section-title"><i class="ph ph-hash"></i> Cấu Trúc Số Hợp Đồng Tự Động</h3>
+                        <!-- Auto Number Builder -->
+                        <div class="number-builder-box mb-24 preview-context-box">
+                            <div class="form-group mb-16">
+                                <label>Năm Ký <span class="req">*</span></label>
+                                <div class="input-wrapper"><select id="nb-year" required></select></div>
+                            </div>
+                            <div class="form-group mb-16">
+                                <label>Đơn Vị Chủ Trì (Mã) <span class="req">*</span></label>
+                                <div class="input-wrapper"><select id="nb-dept" required></select></div>
+                            </div>
+                            <div class="form-group mb-16">
+                                <label>Chủ Đầu Tư (Mã) <span class="req">*</span></label>
+                                <div class="input-wrapper"><select id="nb-investor" required></select></div>
+                            </div>
+                            <div class="form-group mb-16">
+                                <label>Mã Đối Tác (Bên B) <span class="req">*</span> <span
+                                        class="text-sm text-sec">(Sinh
+                                        tự động từ Nhà Thầu, có thể sửa)</span></label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="nb-partner" list="partner-datalist"
+                                        placeholder="Chọn hoặc nhập mã đối tác (Ví dụ: NT)" required>
+                                    <datalist id="partner-datalist"></datalist>
+                                </div>
+                            </div>
+                            <div id="contract-number-display" class="partner-code-box">
+                                <span>Số Hợp Đồng:</span>
+                                <strong id="nb-result" class="partner-code-value">Sẽ được tạo
+                                    tự động sau khi lưu</strong>
+                                <input type="hidden" id="f-contractNumber">
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <!-- 1. AI EXTRACTION ZONE -->
+                    <div class="upload-container glass-panel mb-24">
+                        <div id="drop-zone" class="drop-zone">
+                            <i class="ph ph-upload-simple upload-icon"></i>
+                            <h3>Kéo thả file hợp đồng vào đây</h3>
+                            <p class="upload-hint">Hỗ trợ File Word (.docx), PDF (.pdf), hoặc cấu trúc ảnh (Image)</p>
+                            <p class="upload-limit">Tối đa 25MB. Hợp đồng sau khi trích xuất sẽ được lưu vào hệ thống
+                                Drive
+                                chung.</p>
+                            <div class="mt-24">
+                                <span class="btn-divider">HOẶC</span>
+                            </div>
+                            <button type="button" class="btn btn-primary mt-24" id="btn-browse-file">
+                                <i class="ph ph-folder-open"></i> Chọn File Từ Máy
+                            </button>
+                            <input type="file" id="file-input" hidden accept=".docx,.pdf,image/*">
+                        </div>
+
+                        <!-- Progress / Status Area -->
+                        <div id="extraction-status" class="extraction-status mt-24" style="display: none;">
+                            <h4 id="extract-title">Đang xử lý tài liệu...</h4>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="extract-progress"></div>
+                            </div>
+                            <p id="extract-desc" class="status-desc">Hệ thống đang đọc cấu trúc file DOCX...</p>
+                        </div>
+                    </div>
+
+                    <div class="flex-center-y-32">
+                        <hr class="divider-line">
+                        <span class="divider-text"><i class="ph ph-caret-down"></i> Điền Form Thông Tin Hợp Đồng Dưới
+                            Đây</span>
+                        <hr class="divider-line">
+                    </div>
+
+                    <!-- Status indicators for AI extraction -->
+                    <div id="ai-status-bar" class="ai-status-bar glass-panel mb-24" style="display: none;">
+                        <div class="ai-status-content">
+                            <i class="ph ph-robot status-icon pulse"></i>
+                            <span id="ai-status-text">Đã trích xuất thông tin. Hãy kiểm tra các trường màu vàng.</span>
+                        </div>
+                        <div class="confidence-legend">
+                            <span class="legend-item"><span class="dot dot-high"></span> Chắc chắn</span>
+                            <span class="legend-item"><span class="dot dot-med"></span> Cần kiểm tra</span>
+                            <span class="legend-item"><span class="dot dot-low"></span> Trống/Lỗi</span>
+                        </div>
+                        <!-- Upload File Preview Context (If uploaded) -->
+                        <div id="upload-preview-context" class="upload-preview-context" style="display: none;">
+                            <i class="ph ph-paperclip"></i>
+                            <span id="upload-filename">...</span>
+                            <span class="badge badge-blue">Đã đính kèm</span>
+                        </div>
+                    </div>
+
+                    <form id="contract-form" class="smart-form">
+
+                        <!-- SECTION 1: THÔNG TIN CHUNG & TẠO SỐ HĐ -->
+                        <div class="form-section glass-panel">
+                            <h3 class="section-title"><i class="ph ph-info"></i> 1. Thông Tin Chung</h3>
+
+                            <!-- Contract Summary from AI -->
+                            <div class="form-group" id="summary-group" style="display: none;">
+                                <label><i class="ph ph-magic-wand text-emerald"></i> Thông tin chính
+                                    của hợp đồng (AI Tổng Hợp)</label>
+                                <div class="input-wrapper" data-field="contractSummary">
+                                    <textarea id="f-contractSummary" rows="10" readonly
+                                        class="summary-textarea"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group grid-span-2">
+                                    <label>Dự Án <span class="req">*</span></label>
+                                    <div class="input-wrapper" data-field="projectName">
+                                        <input type="text" id="f-projectName" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Ngày Ký</label>
+                                    <div class="input-wrapper" data-field="signDate">
+                                        <input type="date" id="f-signDate">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Gói Thầu</label>
+                                    <div class="input-wrapper" data-field="bidPackage">
+                                        <input type="text" id="f-bidPackage">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 2: CHỦ ĐẦU TƯ -->
+                        <div class="form-section glass-panel mt-24">
+                            <h3 class="section-title"><i class="ph ph-buildings"></i> 2. Chủ Đầu Tư (Bên A)</h3>
+                            <div class="grid-2">
+                                <div class="form-group grid-span-2">
+                                    <label>Tên Chủ Đầu Tư <span class="req">*</span></label>
+                                    <div class="input-wrapper" data-field="investorName">
+                                        <input type="text" id="f-investorName" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Người Đại Diện</label>
+                                    <div class="input-wrapper" data-field="investorRep">
+                                        <input type="text" id="f-investorRep">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Mã Số Thuế</label>
+                                    <div class="input-wrapper" data-field="investorTax">
+                                        <input type="text" id="f-investorTax">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Số Tài Khoản</label>
+                                    <div class="input-wrapper" data-field="investorAccountNo">
+                                        <input type="text" id="f-investorAccountNo" placeholder="Số TK">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tên Ngân Hàng</label>
+                                    <div class="input-wrapper" data-field="investorBankName">
+                                        <input type="text" id="f-investorBankName" placeholder="Tên ngân hàng">
+                                    </div>
+                                </div>
+                                <div class="form-group grid-span-2">
+                                    <label>Số Giấy Phép ĐKKD</label>
+                                    <div class="input-wrapper" data-field="investorBusinessLicense">
+                                        <input type="text" id="f-investorBusinessLicense" placeholder="VD: 0101234567">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 3: NHÀ THẦU -->
+                        <div class="form-section glass-panel mt-24">
+                            <h3 class="section-title"><i class="ph ph-hard-hat"></i> 3. Nhà Thầu (Bên B)</h3>
+                            <div class="grid-2">
+                                <div class="form-group grid-span-2">
+                                    <label>Tên Nhà Thầu <span class="req">*</span></label>
+                                    <div class="input-wrapper" data-field="contractorName">
+                                        <input type="text" id="f-contractorName" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Người Đại Diện</label>
+                                    <div class="input-wrapper" data-field="contractorRep">
+                                        <input type="text" id="f-contractorRep">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Mã Số Thuế</label>
+                                    <div class="input-wrapper" data-field="contractorTax">
+                                        <input type="text" id="f-contractorTax">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Số Tài Khoản</label>
+                                    <div class="input-wrapper" data-field="contractorAccountNo">
+                                        <input type="text" id="f-contractorAccountNo" placeholder="Số TK">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tên Ngân Hàng</label>
+                                    <div class="input-wrapper" data-field="contractorBankName">
+                                        <input type="text" id="f-contractorBankName" placeholder="Tên ngân hàng">
+                                    </div>
+                                </div>
+                                <div class="form-group grid-span-2">
+                                    <label>Số Giấy Phép ĐKKD</label>
+                                    <div class="input-wrapper" data-field="contractorBusinessLicense">
+                                        <input type="text" id="f-contractorBusinessLicense"
+                                            placeholder="VD: 0101234567">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 4: TÀI CHÍNH & THỰC HIỆN -->
+                        <div class="form-section glass-panel mt-24">
+                            <h3 class="section-title"><i class="ph ph-bank"></i> 4. Tài Chính & Thanh Toán</h3>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Giá Hợp Đồng (VND - Sau thuế VAT) <span class="req">*</span></label>
+                                    <div class="input-wrapper" data-field="contractValue">
+                                        <input type="text" id="f-contractValue" placeholder="Nhập số..." required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Giá Hợp Đồng (Bằng chữ)</label>
+                                    <div class="input-wrapper" data-field="contractValueText">
+                                        <input type="text" id="f-contractValueText" placeholder="VD: Một tỷ đồng chẵn">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Thuế VAT (%)</label>
+                                    <div class="input-wrapper" data-field="vatRate">
+                                        <input type="number" id="f-vatRate" min="0" max="100" step="1" placeholder="8">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tạm Ứng</label>
+                                    <div class="input-wrapper" data-field="advancePayment">
+                                        <input type="text" id="f-advancePayment" placeholder="Nhập số tiền hoặc %">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Số Lần Thanh Toán</label>
+                                    <div class="input-wrapper" data-field="paymentCount">
+                                        <input type="number" id="f-paymentCount" placeholder="VD: 3">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Điều Kiện Thanh Toán</label>
+                                    <div class="input-wrapper" data-field="paymentTerms">
+                                        <input type="text" id="f-paymentTerms">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Thời Hạn Quyết Toán</label>
+                                    <div class="input-wrapper" data-field="settlementDeadline">
+                                        <input type="text" id="f-settlementDeadline">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Thời Hạn Thanh Lý HĐ</label>
+                                    <div class="input-wrapper" data-field="liquidationDeadline">
+                                        <input type="text" id="f-liquidationDeadline">
+                                    </div>
+                                </div>
+                                <div class="form-group grid-span-2">
+                                    <label>Ghi Chú</label>
+                                    <div class="input-wrapper" data-field="notes">
+                                        <textarea id="f-notes" rows="2"
+                                            placeholder="Ghi chú về thanh toán, quyết toán, thanh lý..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 5: BẢO HIỂM & BẢO HÀNH -->
+                        <div class="form-section glass-panel mt-24">
+                            <h3 class="section-title"><i class="ph ph-shield-check"></i> 5. Bảo Hiểm & Bảo Hành</h3>
+                            <div class="grid-2">
+                                <div class="form-group grid-span-2">
+                                    <label>Bảo Hiểm</label>
+                                    <div class="input-wrapper" data-field="insurance">
+                                        <textarea id="f-insurance" rows="3"
+                                            placeholder="Thông tin về bảo hiểm liên quan"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group grid-span-2">
+                                    <label>Bảo Hành</label>
+                                    <div class="input-wrapper" data-field="warranty">
+                                        <textarea id="f-warranty" rows="3"
+                                            placeholder="Thông tin về thời hạn và điều kiện bảo hành"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 6: THỜI GIAN & TIẾN ĐỘ -->
+                        <div class="form-section glass-panel mt-24">
+                            <h3 class="section-title"><i class="ph ph-calendar-check"></i> 6. Thời Gian & Tiến Độ Thực
+                                Hiện
+                            </h3>
+                            <div class="grid-2">
+                                <div class="form-group grid-span-2">
+                                    <label>Thời Gian Thực Hiện Hợp Đồng</label>
+                                    <div class="input-wrapper" data-field="contractDuration">
+                                        <input type="text" id="f-contractDuration" placeholder="VD: 120 ngày">
+                                    </div>
+                                </div>
+                                <div class="form-group grid-span-2">
+                                    <label>Tiến Độ Thực Hiện Hợp Đồng/Gói Thầu</label>
+                                    <div class="input-wrapper" data-field="executionProgress">
+                                        <textarea id="f-executionProgress" rows="4"
+                                            placeholder="Tóm tắt các mốc thời gian và tiến độ quan trọng..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+            </section>
+
+
+
+            <!-- VIEW: ADMIN SETTINGS -->
+            <section id="view-admin" class="view-section">
+
+                <!-- LOGIN MASK FOR ADMIN -->
+                <div id="admin-login-view" class="admin-login-container">
+                    <div class="glass-panel admin-login-box">
+                        <i class="ph ph-shield-check admin-login-icon"></i>
+                        <h2>Xác Thực Chuyên Gia</h2>
+                        <p class="mb-24 mt-12" style="color: var(--text-sec)">Bạn cần quyền Admin để thay đổi cấu hình
+                            hệ thống.</p>
+                        <input type="password" id="admin-password-input" class="form-control mb-16"
+                            placeholder="Nhập mật khẩu quản trị">
+                        <button id="btn-admin-login" class="btn btn-primary btn-block">Đăng Nhập</button>
+                    </div>
+                </div>
+
+                <!-- ADMIN DASHBOARD CONTENT -->
+                <div id="admin-dashboard-view" class="d-none">
+                    <header class="view-header">
+                        <div>
+                            <h1>Quản Trị Hệ Thống</h1>
+                            <p class="view-desc">Chỉnh sửa API, danh sách phòng ban và mã số tự động.</p>
+                        </div>
+                        <button class="btn btn-outline" id="btn-admin-logout" class="text-amber"><i
+                                class="ph ph-sign-out"></i> Thoát</button>
+                    </header>
+
+                    <!-- TAB HEADERS -->
+                    <div class="admin-tabs grid-4 mb-24 gap-8">
+                        <button class="btn btn-outline admin-tab-btn active" data-target="tab-api"><i
+                                class="ph ph-plug"></i> API & Cấu Hình</button>
+                        <button class="btn btn-outline admin-tab-btn" data-target="tab-dept"><i
+                                class="ph ph-buildings"></i> Đơn Vị Chủ Trì</button>
+                        <button class="btn btn-outline admin-tab-btn" data-target="tab-investors"><i
+                                class="ph ph-briefcase"></i> CĐT & Đối Tác</button>
+                        <button class="btn btn-outline admin-tab-btn" data-target="tab-pwd"><i
+                                class="ph ph-lock-key"></i> Đổi Mật Khẩu</button>
+                    </div>
+
+                    <!-- TAB 1: API -->
+                    <div class="admin-tab-pane active" id="tab-api">
+                        <div class="glass-panel">
+                            <h3 class="mb-24">Cấu Hình Kết Nối API</h3>
+                            <div class="form-group">
+                                <label>Gemini API Key</label>
+                                <div class="flex-gap-8">
+                                    <input type="password" id="cfg-gemini-key" class="form-control flex-1">
+                                    <button id="btn-test-api" class="btn btn-outline whitespace-nowrap"><i
+                                            class="ph ph-lightning"></i> Test API</button>
+                                </div>
+                            </div>
+                            <div class="form-group mt-16">
+                                <label>Model Trí Tuệ Nhân Tạo (Gemini Model)</label>
+                                <select id="cfg-gemini-model" class="form-control">
+                                    <option value="gemini-2.5-flash">gemini-2.5-flash (Mặc định)</option>
+                                    <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+                                    <option value="gemini-2.5-pro">gemini-2.5-pro</option>
+                                </select>
+                                <p class="text-xs text-sec mt-4">*Nhấn "Test API"
+                                    để tự động tải danh sách Model mới nhất</p>
+                            </div>
+                            <div class="form-group mt-16">
+                                <label>Google Drive Root Folder ID</label>
+                                <input type="text" id="cfg-drive-id" class="form-control">
+                            </div>
+                            <div class="form-group mt-16">
+                                <label>Apps Script Endpoint URL (Read Only)</label>
+                                <input type="text" id="cfg-api-url" class="form-control" readonly class="opacity-60">
+                            </div>
+                            <button id="btn-save-api-config" class="btn btn-primary mt-24"><i
+                                    class="ph ph-floppy-disk"></i> Lưu Cấu Hình API</button>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: DEPT -->
+                    <div class="admin-tab-pane" id="tab-dept">
+                        <div class="glass-panel">
+                            <div class="flex-between-center mb-24">
+                                <h3>Đơn Vị Chủ Trì (Bộ Phận)</h3>
+                                <button id="btn-add-dept" class="btn btn-secondary"><i class="ph ph-plus"></i> Thêm
+                                    Dòng</button>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="w-150">Mã Viết Tắt</th>
+                                        <th>Tên Đầy Đủ</th>
+                                        <th class="w-60">Xóa</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dept-list-table"></tbody>
+                            </table>
+                            <button id="btn-save-depts" class="btn btn-primary mt-24"><i class="ph ph-floppy-disk"></i>
+                                Lưu Danh Sách Đơn Vị</button>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: INVESTORS & PARTNERS -->
+                    <div class="admin-tab-pane" id="tab-investors">
+                        <div class="grid-2">
+                            <!-- INVESTORS -->
+                            <div class="glass-panel">
+                                <div class="flex-between-center mb-24">
+                                    <h3>Chủ Đầu Tư (Bên A)</h3>
+                                    <button id="btn-add-investor" class="btn btn-secondary btn-sm"><i
+                                            class="ph ph-plus"></i> Thêm</button>
+                                </div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="w-100">Mã CĐT</th>
+                                            <th>Tên Đầy Đủ</th>
+                                            <th class="w-60">Xóa</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="investor-list-table"></tbody>
+                                </table>
+                                <button id="btn-save-investors" class="btn btn-primary mt-24 btn-block"><i
+                                        class="ph ph-floppy-disk"></i> Lưu Chủ Đầu Tư</button>
+                            </div>
+                            <!-- PARTNERS -->
+                            <div class="glass-panel">
+                                <div class="flex-between-center mb-24">
+                                    <h3>Đối Tác (Bên B) Cache</h3>
+                                    <button id="btn-add-partner" class="btn btn-secondary btn-sm"><i
+                                            class="ph ph-plus"></i> Thêm</button>
+                                </div>
+                                <p class="view-desc text-sm mb-16">Mã đối tác được AI sinh tự động khi upload, lưu tạm
+                                    vào đây để tránh trùng lặp cho các HĐ sau.</p>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="w-100">Mã đối tác</th>
+                                            <th>Tên nhà thầu</th>
+                                            <th class="w-60">Xóa</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="partner-list-table"></tbody>
+                                </table>
+                                <button id="btn-save-partners" class="btn btn-primary mt-24 btn-block"><i
+                                        class="ph ph-floppy-disk"></i> Lưu Danh Sách KH</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: PASSWORD -->
+                    <div class="admin-tab-pane" id="tab-pwd">
+                        <div class="glass-panel max-w-500">
+                            <h3 class="mb-24">Đổi Mật Khẩu Quản Trị</h3>
+                            <div class="form-group">
+                                <label>Mật Khẩu Cũ</label>
+                                <input type="password" id="admin-old-pwd" class="form-control">
+                            </div>
+                            <div class="form-group mt-16">
+                                <label>Mật Khẩu Mới</label>
+                                <input type="password" id="admin-new-pwd" class="form-control">
+                            </div>
+                            <div class="form-group mt-16">
+                                <label>Xác Nhận Mật Khẩu Mới</label>
+                                <input type="password" id="admin-confirm-pwd" class="form-control">
+                            </div>
+                            <button id="btn-change-password" class="btn btn-primary mt-24"><i
+                                    class="ph ph-lock-key"></i> Đổi Mật Khẩu</button>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- VIEW: USER MANUAL -->
+            <section id="view-manual" class="view-section">
+                <header class="view-header">
+                    <div>
+                        <h1>Hướng Dẫn Sử Dụng</h1>
+                        <p class="view-desc">Cẩm nang người dùng ACV Contract Manager App</p>
+                    </div>
+                </header>
+
+                <div class="content-panel glass-panel mt-24">
+                    <div style="max-width: 800px; margin: 0 auto; line-height: 1.6; color: var(--text-primary);">
+                        <h2
+                            style="color: var(--color-primary); border-bottom: 2px solid var(--border); padding-bottom: 8px; margin-bottom: 16px;">
+                            1. MỤC ĐÍCH SỬ DỤNG</h2>
+                        <p>Hệ thống <strong>Quản lý Hợp đồng ACV</strong> là giải pháp chuyển đổi số dành riêng cho việc
+                            quản lý hợp đồng tại Cảng hàng không quốc tế Cam Ranh (CXR).</p>
+                        <ul style="margin-left: 20px; margin-bottom: 24px;">
+                            <li><strong>Chức năng lõi:</strong> Chuẩn hóa và tự động hóa quy trình Đăng ký & Cấp Số Hợp
+                                Đồng thay cho sổ tay thủ công.</li>
+                            <li><strong>AI Bóc Tách:</strong> Tự động quét Tờ trình, Hợp đồng nháp để trích xuất thông
+                                tin mà không cần gõ phím.</li>
+                        </ul>
+
+                        <h2
+                            style="color: var(--color-primary); border-bottom: 2px solid var(--border); padding-bottom: 8px; margin-bottom: 16px;">
+                            2. CẤU TRÚC HỆ THỐNG</h2>
+                        <ul style="margin-left: 20px; margin-bottom: 24px;">
+                            <li><strong>Bộ não:</strong> Google Apps Script điều phối API và sinh số tự động.</li>
+                            <li><strong>Dữ liệu:</strong> Mọi thông tin hợp đồng được cất cực kỳ an toàn vào Google
+                                Sheets nội bộ.</li>
+                            <li><strong>Lưu trữ File:</strong> Các file tải lên (Scan/Word) được cất vào Google Drive
+                                riêng.</li>
+                        </ul>
+
+                        <h2
+                            style="color: var(--color-primary); border-bottom: 2px solid var(--border); padding-bottom: 8px; margin-bottom: 16px;">
+                            3. QUY TRÌNH "LẤY SỐ HỢP ĐỒNG"</h2>
+
+                        <h3 style="margin-top: 20px; margin-bottom: 12px;"><i class="ph ph-magic-wand text-emerald"></i>
+                            Bước 1: AI Trích Xuất (Tùy Chọn)</h3>
+                        <p>Kéo thả file hợp đồng nháp (Word/PDF/Scan) vào vùng đám mây. Chờ AI đọc xong sẽ tự bắn chữ
+                            vào Form bên dưới. Giúp tiết kiệm 80% thời gian gõ.</p>
+
+                        <h3 style="margin-top: 20px; margin-bottom: 12px;"><i class="ph ph-check-circle text-amber"></i>
+                            Bước 2: Kiểm Tra Màu Cảnh Báo AI</h3>
+                        <ul style="margin-left: 20px; margin-bottom: 16px;">
+                            <li><span
+                                    style="display:inline-block;width:12px;height:12px;background:#10b981;border-radius:50%;margin-right:8px;"></span>
+                                <strong>Viền Xanh:</strong> Tuyệt vời, AI siêu tự tin. Ít khi phải sửa.</li>
+                            <li><span
+                                    style="display:inline-block;width:12px;height:12px;background:#f59e0b;border-radius:50%;margin-right:8px;"></span>
+                                <strong>Viền Vàng:</strong> Cần ngó lại bằng mắt người một chút trước khi lưu.</li>
+                            <li><span
+                                    style="display:inline-block;width:12px;height:12px;background:#ef4444;border-radius:50%;margin-right:8px;"></span>
+                                <strong>Viền Đỏ:</strong> AI không tìm thấy. Bạn phải tự tay nhập dòng này.</li>
+                        </ul>
+
+                        <h3 style="margin-top: 20px; margin-bottom: 12px;"><i class="ph ph-hash"
+                                style="color: var(--color-primary);"></i> Bước 3: Định Dạng Cấu Trúc Số</h3>
+                        <div
+                            style="background: var(--bg-body); padding: 16px; border-radius: 6px; border: 1px dashed var(--border); margin-bottom: 16px;">
+                            <p><strong>Cấu Trúc Mẫu:</strong>
+                                <code>[2 Số Cuối Năm Ký][STT Tự Tăng]/[Đơn Vị]/[CĐT]-[Nhà Thầu]</code><br />
+                                <em>Ví dụ thực tế: <code>26001/KH/CXR-NT</code></em>
+                            </p>
+                            <ul style="margin-top: 8px; margin-left: 20px; font-size: 0.9em; color: var(--text-sec);">
+                                <li><strong>26:</strong> Năm ký hiện tại.</li>
+                                <li><strong>001:</strong> Số tăng dần liên tục, nhảy tự động trên Backend.</li>
+                                <li><strong>KH:</strong> Do bạn chọn Ban/Bộ Phận chủ trì.</li>
+                                <li><strong>CXR - NT:</strong> Do bạn chọn Mã CĐT & Mã Nhà thầu.</li>
+                            </ul>
+                        </div>
+
+                        <h3 style="margin-top: 20px; margin-bottom: 12px;"><i class="ph ph-floppy-disk"
+                                style="color: var(--color-primary);"></i> Bước 4: Khóa & Sinh Số (Lưu Hợp Đồng)</h3>
+                        <p>Sau khi điền đủ các ô có dấu <span style="color: var(--red-500);">*</span>, bấm nút Xanh
+                            <strong>"Lưu thông tin và lấy số"</strong> ở góc phải. Form sẽ Đóng băng màu xám, và mã số
+                            <code>.../CXR-...</code> độc nhất sẽ được trả về cho bạn kèm viền xanh sáng rực.</p>
+
+                        <h3 style="margin-top: 20px; margin-bottom: 12px;"><i
+                                class="ph ph-plus-circle text-emerald"></i> Bước 5: Lấy Số Tiếp Theo</h3>
+                        <p>Sau khi lưu thành công, hãy bấm vào nút <strong>[+ Lấy Số Cho Hợp Đồng Mới]</strong>. Hệ
+                            thống sẽ ngay lập tức tự reset về một trang trắng tinh tươm cho bộ hồ sơ dự án tiếp theo của
+                            bạn.</p>
+
+                        <hr style="border: none; border-top: 1px solid var(--border); margin: 32px 0;" />
+                        <p style="text-align: center; color: var(--text-sec); font-size: 0.85em;">Tài liệu ban hành nội
+                            bộ bởi Tổ Công Nghệ Thông Tin</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-panel max-w-400">
+            <div class="modal-header">
+                <h3>Cài Đặt & Tài Khoản</h3>
+                <button class="icon-btn close-modal" id="close-settings"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Họ và tên</label>
+                    <input type="text" id="s-user-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Bộ phận</label>
+                    <select id="s-user-dept" class="form-control" required></select>
+                </div>
+                <button class="btn btn-primary btn-block mt-24" id="btn-save-settings">Lưu Thay Đổi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts Ordering -->
+    <!-- 1. Libraries -->
+    <script src="lib/mammoth.browser.min.js"></script>
+    <script src="lib/xlsx.full.min.js"></script>
+    <!-- 2. Configuration & Core Services -->
+    <script src="js/config.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/user.js"></script>
+    <script src="js/api.js"></script>
+    <!-- 3. Domain Logic -->
+    <script src="js/file-manager.js"></script>
+    <script src="js/gemini.js"></script>
+    <script src="js/numbering.js"></script>
+    <script src="js/form.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/excel-export.js"></script>
+    <script src="js/admin.js"></script>
+    <!-- 4. Main App orchestrator -->
+    <script src="js/app.js"></script>
+</body>
+
+</html>
