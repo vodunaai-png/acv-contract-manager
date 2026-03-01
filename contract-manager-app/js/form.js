@@ -3,6 +3,7 @@
  */
 const formManager = {
     currentFile: null,
+    currentDocText: null, // Stores extracted text for AI Consultant
 
     init: () => {
         // Setup clear button
@@ -15,6 +16,12 @@ const formManager = {
         document.getElementById('btn-new-contract').addEventListener('click', () => {
             formManager.clear();
         });
+
+        // Setup AI Consultant Handler
+        const btnConsult = document.getElementById('btn-expert-consult');
+        if (btnConsult) {
+            btnConsult.addEventListener('click', formManager.doConsultation);
+        }
 
         // Auto-format VND
         const valInput = document.getElementById('f-contractValue');
@@ -172,11 +179,63 @@ const formManager = {
         document.getElementById('ai-status-bar').style.display = 'none';
         document.getElementById('upload-preview-context').style.display = 'none';
         formManager.currentFile = null;
+        formManager.currentDocText = null;
 
         // Unlock form and swap buttons back
         formManager.lockForm(false);
 
+        // Reset expert result box
+        const consultBtn = document.getElementById('btn-expert-consult');
+        const consultStatus = document.getElementById('consult-status');
+        const resultBox = document.getElementById('expert-advice-result');
+        if (consultBtn) consultBtn.style.display = 'inline-flex';
+        if (consultStatus) consultStatus.style.display = 'none';
+        if (resultBox) {
+            resultBox.style.display = 'none';
+            resultBox.innerHTML = '';
+        }
+
         ui.toast('Đã dọn dẹp form', 'Sẵn sàng nhập hợp đồng mới', 'info', 2000);
+    },
+
+    /**
+     * Perform Expert Consultation Action
+     */
+    doConsultation: async () => {
+        if (!formManager.currentFile && !formManager.currentDocText) {
+            ui.toast('Thiếu dữ liệu', 'Vui lòng tải lên file hợp đồng trước khi nhờ chuyên gia tư vấn.', 'warning');
+            return;
+        }
+
+        const consultBtn = document.getElementById('btn-expert-consult');
+        const consultStatus = document.getElementById('consult-status');
+        const resultBox = document.getElementById('expert-advice-result');
+
+        // UI Loading
+        consultBtn.style.display = 'none';
+        consultStatus.style.display = 'inline-flex';
+        resultBox.style.display = 'none';
+        resultBox.innerHTML = '';
+
+        try {
+            const rawMarkdown = await gemini.consultContract(formManager.currentFile, formManager.currentDocText);
+
+            if (rawMarkdown) {
+                // Parse markdown to HTML using marked.js
+                const htmlContent = marked.parse(rawMarkdown);
+                resultBox.innerHTML = htmlContent;
+                resultBox.style.display = 'block';
+                ui.toast('Phân tích hoàn tất', 'Chuyên gia đã đưa ra tư vấn. Kéo xuống để xem chi tiết.', 'success');
+                // Scroll down to the result
+                setTimeout(() => resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+            }
+        } catch (error) {
+            console.error("Consultation error:", error);
+        } finally {
+            // Restore button and hide loading
+            consultBtn.style.display = 'inline-flex';
+            consultStatus.style.display = 'none';
+        }
     },
 
     /**

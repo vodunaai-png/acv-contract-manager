@@ -16,6 +16,9 @@
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <!-- Design System CSS -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/legacy.css">
@@ -525,6 +528,25 @@
                                             placeholder="Tóm tắt các mốc thời gian và tiến độ quan trọng..."></textarea>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 7: TƯ VẤN CHUYÊN GIA (AI) -->
+                        <div class="form-section glass-panel mt-24" id="section-ai-consultant">
+                            <h3 class="section-title text-emerald"><i class="ph ph-magic-wand"></i> 7. Tư Vấn Chuyên Gia (AI)</h3>
+                            <p class="view-desc mb-16 text-sm">Chuyên gia AI sẽ rà soát các điều khoản, phân tích rủi ro pháp lý và tài chính cho bản thảo hợp đồng của bạn.</p>
+                            
+                            <div class="flex-center-y gap-8 mb-16">
+                                <button type="button" class="btn btn-outline border-emerald text-emerald" id="btn-expert-consult">
+                                    <i class="ph ph-brain"></i> Bắt đầu phân tích & Tư vấn
+                                </button>
+                                <span id="consult-status" class="text-sm text-sec" style="display:none;">
+                                    <i class="ph ph-spinner pulse"></i> Đang phân tích, vui lòng đợi (có thể mất 1-2 phút)...
+                                </span>
+                            </div>
+
+                            <div id="expert-advice-result" class="markdown-body" style="display: none; padding: 16px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border); overflow-x: auto;">
+                                <!-- Kết quả trả về sẽ được render ở đây -->
                             </div>
                         </div>
                     </form>
