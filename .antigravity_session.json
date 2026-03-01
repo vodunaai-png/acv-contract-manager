@@ -1,0 +1,9 @@
+{
+    "project_state": "Tính năng lưu file đính kèm đã được tối ưu. File upload nay được phân vùng vào thư mục con theo Năm (Year Subfolder), đồng thời tự động chèn Số Hợp Đồng (được làm sạch ký tự) làm tiền tố cho tên file gốc nhằm mục đích dễ dàng quản lý trên Google Drive. Ứng dụng hoạt động ổn định trên cả GitHub Pages và Apps Script Backend.",
+    "pending_todos": [
+        "Phát triển chức năng Edit/Delete hợp đồng cho trang Quản trị (Admin tab).",
+        "Thêm biểu đồ Chart.js thống kê nâng cao cho Dashboard.",
+        "Refactor tối ưu CSS (gộp các style inline vào file styles.css chính) và thêm vendor prefixes cho Safari."
+    ],
+    "technical_roadblocks": "Không có vấn đề nào chặn hệ thống ở thời điểm hiện tại. Luồng Upload và Phân quyền Drive đã được xử lý triệt để."
+}
